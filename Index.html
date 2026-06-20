@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>筆墨心跡 — 書生墨緣互動導覽</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Ma Shan Zheng & Noto Serif TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Serif TC', serif;
+            background-color: #f7f4eb; /* 宣紙微黃 */
+            background-image: radial-gradient(#efece3 1px, transparent 1px), radial-gradient(#efece3 1px, #f7f4eb 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+        .calligraphy-title {
+            font-family: 'Ma Shan Zheng', cursive, 'Noto Serif TC';
+        }
+        /* Custom ink scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1ebd9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5c5240;
+            border-radius: 3px;
+        }
+        /* Fade animation */
+        .fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        /* Brush stroke border effect */
+        .brush-border {
+            border: 12px solid transparent;
+            border-image: radial-gradient(circle at center, #2e261f 70%, transparent 100%) 12;
+        }
+    </style>
+    <script>
+        // Pre-declare fallback image load function to avoid ReferenceError
+        window.handleImageLoadError = function(imgElement) {
+            imgElement.style.display = 'none';
+            const fallbackScroll = document.getElementById('art-failsafe-scroll');
+            if (fallbackScroll) {
+                fallbackScroll.classList.remove('hidden');
+                fallbackScroll.classList.add('flex');
+            }
+        };
+    </script>
+</head>
+<body class="text-stone-900 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Top Calligraphy Header Banner -->
+    <header class="relative py-8 md:py-12 border-b border-stone-300 bg-[#fbf9f4]/80 backdrop-blur shadow-sm z-10">
+        <!-- Stamp Emblem Left -->
+        <div class="absolute left-6 top-6 hidden md:block select-none">
+            <div class="border border-stone-400 text-stone-500 font-bold p-1 text-xs tracking-widest text-center" style="writing-mode: vertical-rl;">
+                <span class="block">歲在丙午</span>
+                <span class="block">夏月吉日</span>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto px-4 flex flex-col items-center justify-center text-center">
+            <!-- Main Title Banner -->
+            <div class="relative inline-block mb-3">
+                <span class="absolute -top-6 -left-6 text-red-700/20 text-5xl opacity-40 select-none">印</span>
+                <h1 class="calligraphy-title text-5xl md:text-7xl font-bold tracking-wider text-stone-950 mb-2 relative">
+                    筆墨心跡
+                </h1>
+                <span class="absolute -bottom-4 -right-6 text-stone-400 text-sm italic font-light tracking-widest select-none">Exhibition Guide</span>
+            </div>
+            
+            <p class="text-stone-600 text-sm md:text-base tracking-[0.3em] font-light mt-4 border-t border-stone-300/60 pt-3">
+                書法與水墨之美 · 展場互動導覽系統
+            </p>
+        </div>
+
+        <!-- Right: "書生墨緣" (Two lines, Vertical style, border, 1.2x larger) -->
+        <div class="absolute right-6 top-6 select-none">
+            <div class="border border-stone-800/80 p-2 rounded-sm text-stone-800 bg-[#fbf9f4]/90 shadow-sm" style="writing-mode: vertical-rl; text-orientation: mixed;">
+                <span class="text-sm md:text-base font-bold calligraphy-title tracking-widest leading-relaxed">書生 墨緣</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Exhibition Container -->
+    <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full">
+        
+        <!-- ============================================== -->
+        <!-- VIEW 1: Homepage (1-82 Works Directory Wall) -->
+        <!-- ============================================== -->
+        <section id="homepage-view" class="bg-[#fbf9f3] rounded-lg border border-stone-300/80 p-6 shadow-md fade-in">
+            
+            <!-- Filter & Search Controls -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-stone-200">
+                <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap gap-1">
+                        <span class="px-3 py-1 text-xs rounded bg-stone-800 text-[#fcfaf7] font-semibold tracking-wider">
+                            書法雅集
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Quick Search Input -->
+                <div class="relative w-full md:w-56">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </span>
+                    <input type="number" id="num-search" min="1" max="82" placeholder="輸入編號 (1-82) 搜尋..." 
+                           class="w-full pl-9 pr-3 py-1.5 bg-[#f6f2e8] border border-stone-300 rounded text-stone-800 text-sm focus:outline-none focus:border-stone-500 focus:ring-1 focus:ring-stone-500">
+                </div>
+            </div>
+
+            <div class="mb-4 flex items-center justify-between">
+                <h3 class="text-stone-800 font-bold tracking-wider text-sm flex items-center gap-2">
+                    <i data-lucide="grid" class="w-4 h-4 text-stone-600"></i>
+                    挑選作品編號 <span class="text-stone-400 font-normal text-xs">(共 82 件佳作)</span>
+                </h3>
+                <span class="text-stone-500 text-xs" id="filtered-count">顯示中: 82 / 82</span>
+            </div>
+
+            <!-- Grid of 1 to 82 -->
+            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 max-h-[580px] overflow-y-auto p-3 border border-stone-200 rounded bg-[#f5f1e6]/40 shadow-inner" id="numbers-grid">
+                <!-- Dynamically populated in JavaScript -->
+            </div>
+
+            <!-- Info Helper Bar -->
+            <div class="mt-5 flex flex-wrap justify-between items-center text-xs text-stone-500 bg-[#ede7d9]/60 p-3 rounded border border-stone-200/50">
+                <span class="flex items-center gap-1">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-800 inline-block"></span> 書法類作品專場
+                </span>
+                <span class="font-light">💡 點選任一編號，立刻跳轉至該墨寶大圖與詳細介紹。</span>
+            </div>
+        </section>
+
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: Detail View (The Sub-Page) -->
+        <!-- ============================================== -->
+        <section id="detail-view" class="hidden flex-col gap-6 w-full fade-in">
+            
+            <div class="bg-[#fcfaf7] border border-stone-300/80 rounded-lg shadow-lg overflow-hidden flex flex-col p-6 brush-border">
+                
+                <!-- TOP HEADER BAR: Back button aligned directly to the left of the Red Seal Stamp -->
+                <div class="flex justify-between items-center mb-5 border-b border-stone-200/60 pb-3.5">
+                    <button onclick="backToHome()" class="px-4 py-1.5 bg-[#ede7d9] hover:bg-[#e2dac6] text-stone-700 text-xs font-semibold rounded shadow-sm flex items-center gap-1.5 transition">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i> 返回首頁
+                    </button>
+                    <div class="text-right flex items-center gap-2">
+                        <span class="text-red-700 font-bold text-xl md:text-2xl calligraphy-title" id="art-stamp-id">
+                            貳拾伍
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Dynamic Water-Ink Artwork Photo & Fallback Frame -->
+                <div class="relative w-full aspect-[4/3] bg-[#faf7f0] rounded border border-stone-200 shadow-inner overflow-hidden flex items-center justify-center mb-5">
+                    
+                    <!-- REAL IMAGE DISPLAY -->
+                    <img id="art-photo" class="w-full h-full object-contain block transition-opacity duration-300" src="" alt="書法作品" onerror="handleImageLoadError(this)">
+                    
+                    <!-- PURE REPLACEMENT CHINESE SCROLL FOR OFFLINE / ABSENT IMAGES (Failsafe) -->
+                    <div id="art-failsafe-scroll" class="hidden absolute inset-0 bg-[#f9f5eb] p-6 md:p-10 flex-col justify-between items-center overflow-y-auto">
+                        <div class="w-full max-w-lg border border-red-700/20 rounded p-6 bg-[#fbf9f4] shadow flex flex-col items-center justify-center my-auto">
+                            <!-- Classical Stamp style header -->
+                            <div class="text-red-700 font-semibold border-2 border-red-700/80 px-4 py-1.5 text-lg md:text-xl calligraphy-title tracking-wider mb-6 rounded-sm">
+                                筆墨心跡 · 雅集
+                            </div>
+                            <!-- Failover Title -->
+                            <h3 id="failsafe-title" class="calligraphy-title text-2xl md:text-3xl font-bold text-stone-900 tracking-wide mb-6">
+                                作品
+                            </h3>
+                            <!-- Classic Vertical Writing Mode block -->
+                            <div class="text-stone-700 font-medium text-base md:text-lg tracking-widest leading-loose max-h-[220px] overflow-y-auto" style="writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 4px;">
+                                <span id="failsafe-desc">
+                                    此作品正處於宣紙皴擦寫意之中，靜候畫境幻化。
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-[10px] text-stone-400 italic tracking-widest mt-4">
+                            「墨跡自適應導覽保護系統」
+                        </div>
+                    </div>
+
+                    <!-- Ambient Decorative Watermark -->
+                    <div class="absolute bottom-4 left-4 select-none pointer-events-none">
+                        <span class="text-stone-400 text-[10px] bg-white/70 px-2 py-0.5 rounded backdrop-blur">
+                            作品編號：<span id="art-id-badge" class="font-bold">25</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Detail Metadata -->
+                <div class="flex-grow flex flex-col">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <span class="px-2.5 py-0.5 text-xs rounded bg-amber-800 text-[#fcfaf7] tracking-wider font-semibold inline-block mb-1.5">
+                                書法
+                            </span>
+                            <h2 class="text-2xl md:text-3xl font-bold text-stone-900 tracking-wide" id="art-title">
+                                筆墨心跡
+                            </h2>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-stone-400 text-xs" id="art-year">丙午年 (2026)</span>
+                        </div>
+                    </div>
+
+                    <!-- Note: The redundant text block (#art-desc) has been completely removed as requested! -->
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Elegant Traditional Footer -->
+    <footer class="border-t border-stone-300 py-6 mt-12 bg-[#faf7ee]/90 text-center">
+        <div class="max-w-4xl mx-auto px-4 flex flex-col items-center justify-center">
+            <div class="flex items-center gap-2 text-stone-600 text-sm">
+                <span class="font-bold calligraphy-title text-lg text-stone-800">筆墨心跡</span>
+                <span>雅集大展</span>
+                <span class="text-stone-300">|</span>
+                <span class="text-xs font-light">丙午年夏月 數位導覽系統</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS Logic Core -->
+    <script>
+        // Complete mapping of all user-uploaded physical works. Correct, robust, and static.
+        const CUSTOM_ARTWORKS = {
+            16: {
+                title: '王昌齡 芙蓉樓送辛漸',
+                image: 'art16.jpg',
+                desc: '以虞世南楷書筆法書寫王昌齡〈芙蓉樓送辛漸〉，取其圓融含蓄、溫潤清雅之筆意，結體疏朗端正，筆畫含蓄內斂。願以靜制動，映襯詩中離情與「一片冰心」之高潔心志，展現典雅沈靜之文人氣韻。'
+            },
+            17: {
+                title: '杜牧 山行',
+                image: 'art17.jpg',
+                desc: '本作取漢《史晨碑》隸書筆意，結體方整而略帶開張，橫畫舒展如屋簷平展，蠶頭雁尾分明有力。用筆中鋒含蓄，起收藏鋒，轉折處見圓潤折勢，強調波磔之美。章法疏朗，字勢平正中寓動態，營造古拙典雅、清穆端莊之氣韻，使《山行》秋山幽景更添漢碑沉雄古意。'
+            },
+            18: {
+                title: '春山空靈意境',
+                image: 'art18_2.jpg',
+                desc: '這首詩以寧靜悠遠的意境打動人心。創作時，我試著將春山的空靈、花落的輕柔與鳥鳴的生動融入筆墨之中。每一次提筆，彷彿都在提醒自己放慢腳步，用心感受生活中那些細微而美好的瞬間。'
+            },
+            19: {
+                title: '桃花如美人',
+                image: 'art19.jpg',
+                desc: '這首詩以細膩筆觸描寫桃花如美人般的神采與風韻。創作時，我反覆品味詩中流露的柔情與春意，希望透過筆墨表現桃花痕跡，展現桃花嫣然盛放的風采，傳達春天生機盎然的美好氣息。'
+            },
+            20: {
+                title: '木芙蓉之秋日從容',
+                image: 'art20.jpg',
+                desc: '木芙蓉開在秋日，不以春花熱烈，卻有歷經風霜後的從容。書寫這首詩時，我試著將詩中堅韌而溫柔的力量融入筆墨之中，呈現木芙蓉自在盛放的風采。'
+            },
+            21: {
+                title: '文徵明自在與安於當下',
+                image: 'art21.jpg',
+                desc: '文徵明以質樸的文字，道出人生難得的自在與人間適。三杯薄酒、一場酣眠，看似平凡，卻蘊含歲月沉澱後的幸福。書寫時，我試著放慢節奏，讓筆墨隨心流轉，感受詩中安於當下的從容，也提醒自己珍惜生活裡簡單而真實的美好。'
+            },
+            22: {
+                title: '蘇軾琴聲哲理',
+                image: 'art22.jpg',
+                desc: '初讀蘇軾這首詩時，便被其中蘊含的哲理所吸引。詩人以琴聲為喻，引人思考聲音究竟來自琴，還是來自指尖。書寫時，我以楷書沉穩端正的筆法體會詩中的深意，也感受楷書所帶來的沉靜與從容。正如琴與手相互成就，書法亦是心境與筆墨交融後的呈現。'
+            },
+            23: {
+                title: '春日江村五首之五',
+                image: 'art23.jpg',
+                desc: '春日江村五首之五是杜甫追懷王粲、賈誼，寄託對李白的思念與感慨。本作品取楊峴隸書筆法，上承漢碑古意，筆勢厚重而不失靈動，藉樸拙的線條，表現詩中懷古傷今、念才惜才的深遠情思。'
+            },
+            24: {
+                title: '杜甫詩意',
+                image: 'art24.jpg',
+                desc: '本作品以杜甫詩意入書，取楊峴隸書筆法為宗。其筆勢沉雄古拙，波磔舒展而含斂，轉折方勁如刀刻金石，兼融漢隸遺韻與帖學氣息。結體開張中見凝重，線條厚實而富節奏，希望能以此呈現江河商運之感歷史興衰之感。'
+            },
+            25: {
+                title: '筆墨心跡 — 夔州歌十絕句',
+                image: 'art25.jpg',
+                desc: '杜甫晚年居夔州，登臨山水，感懷時事，寫下《夔州歌十絕句》。詩中有峽江煙景，有民風世態，更寄寓家國之思。今以行草揮寫，取其氣脈連綿、神采飛動，願觀者於墨色濃淡與筆勢往來之間，領略詩聖筆下夔州風華。'
+            },
+            26: {
+                title: '杜甫諸將五首之一',
+                image: 'art26.jpg',
+                desc: '杜甫諸將五首之一借漢陵興廢、邊患未息，寄寓憂國憂民之情。詩中追憶盛世榮光，感嘆國運滄桑，於沉鬱蒼涼中仍存希望。此作品以行草書寫，取其流暢跌宕之勢，表現詩人深沉的歷史感懷與家國憂思。'
+            },
+            27: {
+                title: '菜根譚句 · 草書',
+                image: 'art27.jpg',
+                desc: '於菜根譚句中，以草書清淡筆法感受真實自在的人生。'
+            },
+            28: {
+                title: '圓融筆法 · 誠摯和善',
+                image: 'art28.jpg',
+                desc: '運用圓融的筆法表現誠摯與和善。'
+            },
+            29: {
+                title: '行草菜根譚 · 穩重智慧',
+                image: 'art29.jpg',
+                desc: '以行草展現於菜根譚句中內剛外柔，穩重的人生智慧。'
+            },
+            30: {
+                title: '草書斗方 · 疏朗淡泊',
+                image: 'art30.jpg',
+                desc: '以草書斗方，疏朗呈現淡泊自在。'
+            },
+            31: {
+                title: '梅蘭竹菊扇面',
+                image: 'art31.jpg',
+                desc: '在四個扇面上分別以行書敘述梅蘭菊竹的詩句，並與「廣結善緣」相呼應。'
+            },
+            32: {
+                title: '聯墨德行文采',
+                image: 'art32_2.jpg',
+                desc: '此聯上讚高潔襟懷，下頌卓然文采。書寫採草書筆意，因勢連綿，氣脈貫通，以線條之動勢表現人格之光明磊落與文章之擲地有聲，寓德行與文采於翰墨之間。'
+            },
+            33: {
+                title: '杜甫懷古詩',
+                image: 'art33_3.jpg',
+                desc: '此作錄杜甫懷古詩，追憶王粲、賈誼二位才士，感慨賢才際遇與功名榮辱。以行書條幅書之，取流暢自然之勢，筆意勁而含情，章法疏朗有致。藉墨韻起伏映照詩人懷古傷今之思，抒發對歷代賢者的景仰與深沉感懷。'
+            },
+            34: {
+                title: '夔州歌十絕句 節錄',
+                image: 'art34.jpg',
+                desc: '此作節錄杜甫《夔州歌十絕句》，前寫蜀麻吳鹽往來、商舟如風之盛景，後寫巫峽奇峰如畫、碧嶂映照楚宮之勝概。全篇融商旅繁華與山川壯麗於一體。作品以行草書寫，取其流暢奔放之勢，藉筆墨節奏展現長江萬里氣象與詩人深沉历史情懷。'
+            },
+            35: {
+                title: '杜甫詩意 追懷武侯',
+                image: 'art35.jpg',
+                desc: '杜甫詩中追懷武侯忠烈，並描繪夔州山川風景。懷古與寫景相映成趣。本作品以隸書書寫取其古樸沉厚、端莊開闊之美，藉橫勢舒展與波磔韻致，表現詩中蒼勁氣象與深遠情懷，寄寓對歷史人物的景仰及對山河形勝的讚嘆。'
+            },
+            36: {
+                title: '聖經箴言 · 金文',
+                image: 'art36_2.jpg',
+                desc: '本作取聖經《箴言》意旨，化為勵志短句，強調言語合宜、應對得體之智慧。以古樸凝重之金文書寫，筆勢渾厚莊嚴，結構取法青銅器銘文，呈現古典雅興與敬慎之精神氣象。寓意言語慎思、心存和諧之德，以示古今相映之意境也。'
+            },
+            37: {
+                title: '詩篇如鹿切慕溪水 · 隸書',
+                image: 'art37_2.jpg',
+                desc: '取《詩篇》：「神啊，我的心切慕你，如鹿切慕溪水」為金句，以伊秉綬隸書筆意寫如鹿切慕溪水六個字，取其沉雄樸厚之勢，波磔開張，方整中見拙趣。結體寬博而氣息內斂，橫畫如屋漏痕，豎筆似鐵柱撐空。寓靜穆之思與渴望之情於筆墨之間，使觀者如聞心靈深處之呼喚。'
+            },
+            38: {
+                title: '雅比斯的禱告 · 行草',
+                image: 'art38_2.jpg',
+                desc: '以啟功行草筆意，取其清勁秀逸、結體疏朗、筆勢連綿而不失法度，書寫雅比斯禱告，表達祈求賜福，擴張境界與同在守護之意。（雅比斯因母親難產才取其名，但其一生孜孜不倦研讀律法和知識，敬虔生活，他的禱告不僅僅是個人向神祈求恩典，更代表著與上帝之間的立約。）'
+            },
+            39: {
+                title: '謝鴻文台語詩歌《願》 · 篆草結合',
+                image: 'art39_2.jpg',
+                desc: '以行草書錄敬拜詩歌，全篇章法疏密相生，上部特留一大空間，以篆書巨字「願」統攝全篇，寓虔誠祈求與信心仰望。行草筆勢流暢連貫，藉墨韻與節奏展現對天父賜福、國度降臨及土地蒙恩的深切盼望，營造莊嚴而充滿生命力的藝術意境。「願」是謝鴻文所創作的台語詩歌。願在台語中有一種特別味道，不是輕輕的講，是一種內心的決定，帶有誠心、實在、無反悔的語氣—禱告的立誓。'
+            },
+            40: {
+                title: '喜樂的心乃是良藥 · 章草',
+                image: 'art40_2.jpg',
+                desc: '作品內容取自《聖經》箴言17章22節：「喜樂的心乃是良藥；憂傷的靈使骨枯乾。」經文揭示心境與生命息息相關，喜樂能滋養身心，憂愁則易消磨活力。創作取法章草，藉其字字獨立、古樸典雅，兼具隸書沉穩與草書靈動的藝術特色，詮釋經文深意，期盼觀者常存喜樂與盼望，使生命充滿更新的力量。'
+            },
+            41: {
+                title: '作光作鹽 · 金文',
+                image: 'art41_2.jpg',
+                desc: '本作品以線條粗壯圓潤、字體參差錯落的金文書寫，展現古樸渾厚之美。「作光作鹽」出自《聖經·馬太福音》，勉勵人們以良善與愛心實踐信念，在平凡生活中發揮正面影響力，照亮他人，潤澤社會。'
+            },
+            42: {
+                title: '保守你心 · 今草',
+                image: 'art42_2.jpg',
+                desc: '作品取自《聖經·箴言》四章二十三節：「你要保守你心，勝過保守一切，因為一生的果效是由心發出。」經文強調內心是品格與行為的根源。今以今草書寫，取其運筆流暢奔放，墨韻連綿，以線條的節奏與氣勢表現心念流轉之意，藉此傳達修養心性、端正思想的重要價值。創作初期先以斗方紙反覆練習構圖與筆法，其後改採圓形紙進行創作，在老師悉心指導下逐步調整章法與墨韻，歷經多次練習方告完成。'
+            },
+            43: {
+                title: '耶和華祝福滿滿 · 簡書',
+                image: 'art43_2.jpg',
+                desc: '《耶和華祝福滿滿》是一首充滿本土情感的讚美詩歌，以親切鄉音傳述上帝的祝福、保守與恩典，表達信徒感恩敬拜之心。作品以率真多變的結體、質樸渾厚的簡書書寫，展現自然真誠的生命力，呼應歌詞所蘊含的信仰情懷。並祈願上帝賜福台灣這片土地，使人民共享豐盛恩典與平安。'
+            },
+            44: {
+                title: '筆墨心跡 — 行草布白',
+                image: 'art44.jpg',
+                desc: '整幅作品採用行草書體，線條流暢且富有動感。行氣連貫，縱有行、橫無列，巧妙的留白與錯落，使整幅作品的布白在視覺上達到了完美的平衡。'
+            },
+            45: {
+                title: '筆墨心跡 — 三種人生境界',
+                image: 'art45.jpg',
+                desc: '行草在奔放中隱藏了幾許沉鬱與蒼茫的意境。筆法與線條，剛柔並濟，沉著痛快。透過筆墨的輕重、乾濕與速度，詞中從「少年的浪漫」、「壯年的漂泊」到「晚年的超然與無奈」的三種人生境界，具象化地呈現在紙張上。'
+            },
+            46: {
+                title: '筆墨心跡 — 方勁古拙',
+                image: 'art46.jpg',
+                desc: '本作嘗試展現隸書「方勁古拙」的特點。以厚重、沉穩且帶有歷史感的隸書來詮釋詞中帶有些許「物是人非、青春不再」的滄桑與回憶，表現人到中年、情感內斂而深沉的沉味。'
+            },
+            47: {
+                title: '筆墨心跡 — 靜謐沉澱',
+                image: 'art47.jpg',
+                desc: '以具有時空厚重感的篆書鋪陳，透過圓潤婉通的線條，將歷史洪流中的超然與釋懷，化為紙上靜謐的沉澱。'
+            },
+            48: {
+                title: '筆墨心跡 — 靈活結字與留白',
+                image: 'art48.jpg',
+                desc: '採用靈活的結字，打破方塊字的框架。行與行之間的邊界自然交錯，以創造活潑的留白。'
+            },
+            49: {
+                title: '筆墨心跡 — 藤蔓與狂放筆意',
+                image: 'art49.jpg',
+                desc: '此作使用高比例的草法與連筆，嘗試在線條的奔放與章法的錯落上，創造狂放、悲憤且連綿的筆意。線條如同藤蔓般纏繞、延伸，極具草書「筆墨相連、氣韻生動」的視覺衝擊。'
+            },
+            50: {
+                title: '筆墨心跡 — 單列大字與風骨',
+                image: 'art50.jpg',
+                desc: '本作品採用「單列大字」的布局，試圖融合篆書、隸書與楷書的意趣，來展現魏碑與漢隸之風骨。'
+            },
+            51: {
+                title: '筆墨心跡 — 計白當黑與意連',
+                image: 'art51.jpg',
+                desc: '本作品屏除文字落款，直接以紅印作為視覺上的氣口與銜接，展現作品的純粹與現代。文中採用「計白當黑」的概念運用。左右兩側留出了大片乾淨的空白，任由中央的黑墨線條縱橫交錯，使畫面產生「筆斷意連、餘音繞樑」的無盡延伸感。'
+            },
+            58: {
+                title: '古樸篆書聯',
+                image: 'art58.jpg',
+                desc: '以篆書書寫此聯，願取其古樸圓勁之筆意，結體端嚴而含篆籀之韻。上聯鋪陳博學之積累，下聯展現文思之氣勢。'
+            },
+            59: {
+                title: '圓勁篆書意境',
+                image: 'art59.jpg',
+                desc: '本作以篆書書寫，願以線條圓勁婉轉如波，墨色濃淡起伏相映，呈現古意與動勢並存之書寫意境。'
+            },
+            60: {
+                title: '杜甫三峽詩意',
+                image: 'art60.jpg',
+                desc: '此詩內容為杜甫描述三峽雄峻與歷史興亡之意，筆勢取漢隸方勁沉雄，波磔分明，結體端嚴，願呈現江山壯闊與人事滄桑交融之氣象。'
+            },
+            61: {
+                title: '筆墨心跡 — 夔州山川雄奇',
+                image: 'art61.jpg',
+                desc: '以行草書寫此詩，取筆勢奔放而氣脈連貫，行中帶草，草中寓法。墨色濃淡相生，線條起伏如山勢江流，映現群雄競起之歷史張力與夔州山川之雄奇景象。'
+            },
+            62: {
+                title: '筆墨心跡 — 峽谷晨曉風雨',
+                image: 'art62.jpg',
+                desc: '本首詩為杜甫描寫峽谷晨曉風雨之景，願以奔放中隱含了幾許沉鬱與蒼茫意境的行草書寫。筆法與線條剛柔並濟，以線條的奔放與章法展現雲煙翻湧與雷雨交作之氣象。'
+            },
+            63: {
+                title: '漁舟歸來夕陽斜',
+                image: 'art63.jpg',
+                desc: '漁舟歸來夕陽斜（甲骨文），揉皺紙張書寫，夕陽餘暉點點之感。夕陽西下，滿載漁兒跳躍在魚舟上～呈現豐收滿魚船。'
+            },
+            64: {
+                title: '放之則彌六合',
+                image: 'art64.jpg',
+                desc: '放之則彌六合，卷之則退藏於密（語出中庸）。六合代表著整個宇宙天地，東西南部，也蘊藏內心深處的修養本質。人之意念不時天馬行空，學習任何技能也是，不外乎放鬆到身心靈最極限的想像空間，反之則退藏於密，又如嬰兒在母親子宮孕育生命，緊密相依，亦如人世間微不足道的塵埃。'
+            },
+            65: {
+                title: '落葉飄飄',
+                image: 'art65.jpg',
+                desc: '落葉飄飄（語出千字文）。喜愛飄飄兩字，當秋風吹起，落葉隨風飄揚，霎時覺得浪漫如畫，平添生活中無限想像詩意，片片落葉隨風飄，一片落葉一片情，雨天聽雨，天晴望海，把柴米油鹽醬醋茶過成詩。'
+            },
+            66: {
+                title: '鯨落',
+                image: 'art66.jpg',
+                desc: '鯨落。靈感來自鯨魚終其一生的影片～猶如母親，從孕育新生命到無限付出的心血階段，襯托底黑，呈現鯨魚沈入，無底深淵的海洋，慢慢～慢慢而結束一生奉獻。'
+            },
+            67: {
+                title: '上善若水',
+                image: 'art67.jpg',
+                desc: '上善若水（老子道德經）。此拙作結合篆書和草書，希望讓視覺略顯活潑。欲上則先下，欲右則先左相呼應的動態，核心在於反蓄勢而產生力與動態美感，如鐘擺效應，動而不已是靜止的，讓字有無限的動感～若水淵遠長流之意。'
+            },
+            68: {
+                title: '無二',
+                image: 'art68.jpg',
+                desc: '無二（排筆書寫）。每個人都是獨一無二的個體，無需刻意模仿他人，整形得了外表，內心無法造就改變，每個人的生活歷練，學經歷，生長環境皆不同，所以好好勇敢做自己，相信自己是獨一無二的精品。'
+            },
+            69: {
+                title: '無上清涼',
+                image: 'art69_2.jpg',
+                desc: '「無上清涼」在佛教語境中，指的是修行者徹底熄滅貪、嗔、癡等煩惱，達到身心皆忘、內心絕對安寧與自在的最高境界。此詞出自《華嚴經》，常被用來形容超越一切炎熱與煩躁的極致清爽與解脫。生命中有無數的考驗與磨難，期許自己關關難過關關過，且能不忘初心，邁向寧靜致遠的境界。'
+            },
+            70: {
+                title: '弘一法師 志別詩',
+                image: 'art70_2.jpg',
+                desc: '弘一法師（李叔同）的《志別詩》是一首著名的七言絕句，又名〈淨峰種菊臨別口占〉。該詩借景抒情，表達了法師豁達坦然的生命觀與無私奉獻的精神。我的師長做的讚頌中有詞「昔誰持種來，而今佳色開。一先賢努力為我們播種，希望自己也承接傳承而能發揚光大。'
+            },
+            71: {
+                title: '董作賓甲骨文七言聯',
+                image: 'art71.jpg',
+                desc: '這是取材自民國董作賓甲骨文七言聯。第一次學寫甲骨文，內心的喜樂維持很久，讓自己銘刻在心的那份寫書法的喜悅，再以草書書寫，希望寫書法的喜悅能加深加廣。'
+            },
+            72: {
+                title: '臨孫過庭書譜',
+                image: 'art72.jpg',
+                desc: '此作臨寫自孫過庭書譜片段。「假令眾妙攸歸。務存骨氣。骨既存矣。而遒潤加之。亦猶枝幹扶疏。凌霜雪而彌勁。花葉鮮茂。與雲日而相暉。」取其骨氣二字，以簡帛兩個大字突顯「骨氣」。'
+            },
+            73: {
+                title: '納福迎祥',
+                image: 'art73.jpg',
+                desc: '「納福」意指享受福分或迎來吉祥。'
+            },
+            74: {
+                title: '董作賓甲骨文七言聯二',
+                image: 'art74.jpg',
+                desc: '這是取材自民國董作賓甲骨文七言聯。第一次學寫甲骨文，內心的喜樂維持很久，讓自己銘刻在心的那份寫書法的喜悅。'
+            }
+        };
+
+        const artworksDb = [];
+        const YEAR_LIST = ['丙午年 夏月', '乙巳年 暮春', '甲辰年 深秋', '癸卯年 冬月'];
+
+        function generateArtworksDb() {
+            for (let id = 1; id <= 82; id++) {
+                if (CUSTOM_ARTWORKS[id]) {
+                    // Match provided physical paintings
+                    artworksDb.push({
+                        id: id,
+                        title: CUSTOM_ARTWORKS[id].title,
+                        desc: CUSTOM_ARTWORKS[id].desc,
+                        image: CUSTOM_ARTWORKS[id].image,
+                        year: '丙午年 夏月',
+                        stampId: getChineseNumeral(id)
+                    });
+                } else {
+                    // Generate elegant default placeholder parameters (so the database remains complete 1-82)
+                    artworksDb.push({
+                        id: id,
+                        title: `筆墨心跡 — 雅品其${getChineseNumeral(id)}`,
+                        desc: `【作品編號 ${id}】 本作以傳統書體揮灑，線條自然跌宕，筆墨濃淡相宜。旨在透過純粹的書藝墨痕，展現藝術家靜觀自得、澄懷觀道的墨緣精神與生活雅興。`,
+                        image: `art${id}.jpg`,
+                        year: YEAR_LIST[id % YEAR_LIST.length],
+                        stampId: getChineseNumeral(id)
+                    });
+                }
+            }
+        }
+
+        // Convert number to Chinese Classical Stamp ID
+        function getChineseNumeral(num) {
+            const chars = ["零", "壹", "貳", "參", "肆", "伍", "陸", "柒", "捌", "玖", "拾"];
+            if (num <= 10) return chars[num];
+            if (num < 20) return "拾" + (num % 10 !== 0 ? chars[num % 10] : "");
+            const tens = Math.floor(num / 10);
+            const ones = num % 10;
+            return chars[tens] + "拾" + (ones !== 0 ? chars[ones] : "");
+        }
+
+        // --- GLOBAL STATE ---
+        let selectedArtId = 25; // Default starts selected at No. 25
+        let searchQuery = '';
+
+        // DOM Elements
+        let gridContainer, countIndicator, searchInput, homepageView, detailView;
+        let artPhoto, artFailsafeScroll, failsafeTitle, failsafeDesc;
+        let artTitle, artStampId, artIdBadge;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Bind DOM
+            gridContainer = document.getElementById('numbers-grid');
+            countIndicator = document.getElementById('filtered-count');
+            searchInput = document.getElementById('num-search');
+            homepageView = document.getElementById('homepage-view');
+            detailView = document.getElementById('detail-view');
+
+            artPhoto = document.getElementById('art-photo');
+            artFailsafeScroll = document.getElementById('art-failsafe-scroll');
+            failsafeTitle = document.getElementById('failsafe-title');
+            failsafeDesc = document.getElementById('failsafe-desc');
+
+            artTitle = document.getElementById('art-title');
+            artStampId = document.getElementById('art-stamp-id');
+            artIdBadge = document.getElementById('art-id-badge');
+
+            // Initialize Icons & Databases
+            lucide.createIcons();
+            generateArtworksDb();
+            renderNumbersGrid();
+            
+            // Search box listener
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim();
+                renderNumbersGrid();
+            });
+
+            // Set default view but keep homepage visible
+            loadArtworkData(25);
+        });
+
+        function renderNumbersGrid() {
+            gridContainer.innerHTML = '';
+            
+            let filtered = artworksDb.filter(art => {
+                return searchQuery === '' || art.id === parseInt(searchQuery);
+            });
+
+            countIndicator.innerText = `顯示中: ${filtered.length} / 82`;
+
+            filtered.forEach(art => {
+                const btn = document.createElement('button');
+                btn.className = getNumberBtnClass(art.id);
+                btn.innerHTML = `
+                    <span class="text-xs font-bold block">${art.id}</span>
+                    <span class="text-[9px] opacity-75 block whitespace-nowrap overflow-hidden text-ellipsis px-1">${art.title.replace('筆墨心跡 — ', '')}</span>
+                `;
+                btn.onclick = () => selectArtwork(art.id);
+                gridContainer.appendChild(btn);
+            });
+
+            if (filtered.length === 0) {
+                gridContainer.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-stone-400 text-xs">
+                        未尋獲此編號之書法作品
+                    </div>
+                `;
+            }
+        }
+
+        function getNumberBtnClass(id) {
+            const isSelected = id === selectedArtId;
+            if (isSelected) {
+                return 'aspect-square flex flex-col items-center justify-center border-2 border-amber-800 bg-amber-50 text-amber-900 rounded-md transition-all duration-200 shadow-md ring-2 ring-amber-800/10 transform scale-105';
+            }
+            return 'aspect-square flex flex-col items-center justify-center border border-amber-200/60 bg-[#fcf8ed] text-amber-900 hover:bg-amber-100/60 text-center rounded transition-all duration-150 shadow-sm';
+        }
+
+        function selectArtwork(id) {
+            loadArtworkData(id);
+            
+            // 1. Hide the Homepage View
+            homepageView.classList.add('hidden');
+            
+            // 2. Show the Sub-Page View
+            detailView.classList.remove('hidden');
+            detailView.classList.add('flex');
+            
+            // Smooth scroll to top of page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function backToHome() {
+            // 1. Hide Detail View
+            detailView.classList.add('hidden');
+            detailView.classList.remove('flex');
+            
+            // 2. Show Homepage Grid
+            homepageView.classList.remove('hidden');
+            
+            // Clear any single search query so the user returns to the full directory
+            searchInput.value = '';
+            searchQuery = '';
+            renderNumbersGrid();
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function loadArtworkData(id) {
+            selectedArtId = id;
+            const art = artworksDb.find(a => a.id === id);
+            if (!art) return;
+
+            // Clear previous display states
+            artPhoto.classList.remove('opacity-0');
+            artPhoto.style.display = 'block';
+            artFailsafeScroll.classList.add('hidden');
+            artFailsafeScroll.classList.remove('flex');
+
+            // Set images and descriptions
+            artPhoto.src = art.image;
+            
+            artTitle.innerText = art.title;
+            artStampId.innerText = art.stampId;
+            artIdBadge.innerText = art.id;
+
+            // Pre-set text fallbacks inside the failsafe container (used only when image load fails)
+            failsafeTitle.innerText = art.title;
+            failsafeDesc.innerText = art.desc;
+        }
+    </script>
+</body>
+</html>
